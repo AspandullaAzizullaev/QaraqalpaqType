@@ -1,0 +1,596 @@
+
+<!DOCTYPE html>
+<html lang="kaa">
+<head>
+<meta charset="UTF-8">
+<meta name="monetag" content="b4dd7017295f245f2733be62f680fb55">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QaraqalpaqTYPE</title>
+<style>
+:root {
+  --bg: #323437;
+  --panel: #2c2e31;
+  --text: #d1d0c5;
+  --muted: #646669;
+  --yellow: #e2b714;
+  --red: #ca4754;
+  --border: #45474a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Roboto Mono", Consolas, monospace;
+}
+button { font: inherit; }
+header {
+  max-width: 1100px;
+  margin: auto;
+  padding: 28px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -1.2px;
+}
+.logo span { color: var(--yellow); }
+.muted { color: var(--muted); font-size: 11px; }
+main {
+  max-width: 1000px;
+  margin: 48px auto 0;
+  padding: 0 25px;
+}
+.menu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 10px;
+  margin-bottom: 45px;
+  background: var(--panel);
+  border-radius: 5px;
+}
+.menu-label {
+  color: var(--yellow);
+  font-size: 12px;
+  margin: 0 9px;
+}
+.menu button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 9px 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color .15s;
+}
+.menu button:hover { color: var(--text); }
+.menu button.active { color: var(--yellow); }
+.timer {
+  color: var(--muted);
+  text-align: center;
+  font-size: 11px;
+  margin-bottom: 25px;
+}
+.timer strong {
+  display: block;
+  color: var(--yellow);
+  font-size: 40px;
+  line-height: 1.2;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+.wordsbox {
+  height: 190px;
+  overflow: hidden;
+  position: relative;
+  cursor: text;
+  mask-image: linear-gradient(
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+}
+#words {
+  font-family: "Roboto Mono", Consolas, monospace;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.8;
+  letter-spacing: 0;
+  word-spacing: 3px;
+  transition: transform 120ms ease;
+}
+.word { display: inline-block; white-space: nowrap; }
+.char { color: var(--muted); }
+.char.ok { color: var(--text); }
+.char.bad, .char.skip {
+  color: var(--red);
+  background: transparent;
+}
+.char.cursor { position: relative; }
+.char.cursor:before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 4px;
+  width: 2px;
+  height: 29px;
+  background: var(--yellow);
+  animation: blink 1s infinite;
+}
+@keyframes blink { 50% { opacity: .2; } }
+#input {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  opacity: 0;
+}
+.actions {
+  text-align: center;
+  margin: 30px 0 75px;
+}
+.restart {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color .15s;
+}
+.restart:hover { color: var(--yellow); }
+.hint {
+  margin-top: 13px;
+  color: var(--muted);
+  font-size: 11px;
+}
+kbd {
+  color: var(--text);
+  background: var(--panel);
+  border-radius: 3px;
+  padding: 3px 6px;
+}
+.info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 45px;
+}
+.info-card {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.info-card .symbol {
+  color: var(--yellow);
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+.info-card h3 {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 400;
+  margin: 0 0 10px;
+}
+.info-card p {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.9;
+  margin: 0;
+}
+footer {
+  padding: 30px 15px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: #202224eF;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.overlay.show { display: flex; }
+.modal {
+  width: min(420px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 30px;
+}
+.modal h2 {
+  color: var(--yellow);
+  font-size: 20px;
+  font-weight: 400;
+  margin: 0 0 8px;
+}
+.modal > p { color: var(--muted); font-size: 12px; }
+.results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 25px 0;
+}
+.result {
+  padding: 18px;
+  background: var(--bg);
+  border-radius: 5px;
+}
+.result label {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.result strong {
+  color: var(--yellow);
+  font-size: 32px;
+  font-weight: 400;
+}
+.result p {
+  color: var(--muted);
+  font-size: 10px;
+  margin-bottom: 0;
+}
+.primary {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--yellow);
+  color: #323437;
+  cursor: pointer;
+  transition: background .15s;
+}
+.primary:hover { background: #f0c629; }
+@media (max-width: 600px) {
+  header { padding: 22px 17px; }
+  main { margin-top: 25px; padding: 0 17px; }
+  .menu { margin-bottom: 35px; gap: 2px; }
+  .menu button { padding: 9px 10px; }
+  .menu-label { margin: 0 4px; }
+  .wordsbox { height: 145px; }
+  #words { font-size: 22px; line-height: 1.9; word-spacing: 2px; }
+  .char.cursor:before { height: 23px; }
+  .info { grid-template-columns: 1fr; gap: 10px; }
+  .info-card { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">Qaraqalpaq<span>TYPE</span>.</div>
+    <div class="muted">Soz jaziw tezligi</div>
+  </div>
+  <div class="muted">TAB ↻ RESTART</div>
+</header>
+
+<main>
+  <div class="menu">
+    <span class="menu-label">Waqit</span>
+    <button data-time="15">15</button>
+    <button data-time="30" class="active">30</button>
+    <button data-time="60">60</button>
+    <button data-time="120">120</button>
+    <span class="menu-label">Sekund</span>
+  </div>
+
+  <div class="timer">
+    <strong id="time">30</strong>
+    SEKUND
+  </div>
+
+  <div class="wordsbox" id="box">
+    <div id="words"></div>
+  </div>
+  <input id="input" autocomplete="off" autocorrect="off"
+    autocapitalize="off" spellcheck="false">
+
+  <div class="actions">
+    <button class="restart" id="restart">↻ &nbsp; Restart test</button>
+    <div class="hint">
+    <kbd>Tab</kbd> restart
+    </div>
+  </div>
+
+  <div class="info">
+    <div class="info-card">
+      <div class="symbol">01 /</div>
+      <h3>Tezlik</h3>
+      <p>Tezroq jazıwǵa háreket etiń. Hár bir shınıǵıw sizge járdem beredi.</p>
+    </div>
+    <div class="info-card">
+      <div class="symbol">02 /</div>
+      <h3>Aniqlıq</h3>
+      <p>Hár bir háripti durıs jazıń. Qátelerdi azaytıwǵa itibar beriń.</p>
+    </div>
+    <div class="info-card">
+      <div class="symbol">03 /</div>
+      <h3>Shınıǵıw</h3>
+      <p>Kún sayın jazıp kóriń hám óz tezligińizdi jaqsılap barıń.</p>
+    </div>
+  </div>
+</main>
+
+<footer>QaraqalpaqTYPE</footer>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>Test tamamlandı</h2>
+    <p>Test nátiyjeńiz</p>
+    <div class="results">
+      <div class="result">
+        <label>JAZIW TEZLIGI</label>
+        <strong id="finalWpm">0</strong>
+        <p>WPM</p>
+      </div>
+      <div class="result">
+        <label>ANIQLIQ</label>
+        <strong id="finalAcc">100%</strong>
+        <p>ANIQLIQ</p>
+      </div>
+    </div>
+    <button class="primary" id="again">Qaytadan baslaw ↻</button>
+  </div>
+</div>
+<!-- CAPS LOCK OGOHLANTIRISH -->
+<div id="capslock-warning" style="display: none; background-color: #e2b714; color: #111213; font-family: sans-serif; font-size: 14px; font-weight: bold; padding: 6px 15px; border-radius: 4px; margin: 10px auto; width: fit-content; text-transform: uppercase; letter-spacing: 1px;">
+    ⚠️ Caps Lock Yoqilgan
+
+
+<script>
+const dictionary = `
+men sen ol biz siz olar adam bala ana ata aga apa ini
+pishiq mektep kitap ekran dapter klass sabaq ustaz bilim
+dos qizil esik stol suw jer kok telefon quyash ay juldız
+teniz darya taw jol qala awıl koshe bag gul terek
+alma juzim anar qawın nan sut shay awqat gurish gosh
+mashin piyaz pomidor qıyar shanaraq xalıq watan ana til
+doslıq arman tilek kush baxıt quwanısh jardem jaqsı jaman
+ulken kishi jana eski tez aste sulıw taza
+qızıl sarı jasıl kok tus jıllı suwıq bugin erten hazir
+kuni tun tan kesh waqıt saat minut hapte jaz guz qıs
+jawın qar samal bulıt hawa tabiyat oqıw jazıw soylew
+uyreniw islew juriw keliw barıw koriw biliw aytıw
+alıw beriw tabıw parta oynaw juwiriw bir eki ush
+tort bes altı jeti segiz togız on mektepke baraman
+dostım menen oynayman suw ishemen nan jeymen ana uyde
+ata jumısqa ketti bala mektepke bardı kun jaqsı
+`.trim().split(/\s+/);
+
+const $ = id => document.getElementById(id);
+
+let duration = 30;
+let remaining = 30;
+let target = [];
+let index = 0;
+let typed = "";
+let started = false;
+let ended = false;
+let timer = null;
+let correct = 0;
+let total = 0;
+
+function pick() {
+  return dictionary[Math.floor(Math.random() * dictionary.length)];
+}
+
+function makeWords() {
+  target = Array.from({length: 100}, pick);
+}
+
+function render() {
+  $("words").innerHTML = "";
+  target.forEach((word, i) => {
+    const el = document.createElement("span");
+    el.className = "word";
+    el.dataset.i = i;
+
+    [...word].forEach(letter => {
+      const char = document.createElement("span");
+      char.className = "char";
+      char.textContent = letter;
+      el.append(char);
+    });
+
+    $("words").append(el, document.createTextNode(" "));
+  });
+  paint();
+}
+
+function paint() {
+  document.querySelectorAll(".char.cursor").forEach(el =>
+    el.classList.remove("cursor")
+  );
+
+  const word = document.querySelector(`.word[data-i="${index}"]`);
+  if (!word) return;
+
+  [...word.children].forEach((char, i) => {
+    char.classList.remove("ok", "bad", "skip");
+    if (i < typed.length) {
+      char.classList.add(typed[i] === char.textContent ? "ok" : "bad");
+    }
+  });
+
+  const cursor = word.children[
+    Math.min(typed.length, word.children.length - 1)
+  ];
+  if (cursor && !ended) cursor.classList.add("cursor");
+
+  const lineHeight = parseFloat(getComputedStyle($("words")).lineHeight);
+  const line = Math.floor(word.offsetTop / lineHeight);
+  $("words").style.transform =
+    `translateY(-${Math.max(0, (line - 1) * lineHeight)}px)`;
+}
+
+function start() {
+  if (started || ended) return;
+  started = true;
+
+  timer = setInterval(() => {
+    remaining--;
+    $("time").textContent = remaining;
+    if (remaining <= 0) finish();
+  }, 1000);
+}
+
+function addWords() {
+  const oldLength = target.length;
+  for (let i = 0; i < 100; i++) target.push(pick());
+
+  target.slice(oldLength).forEach((word, n) => {
+    const el = document.createElement("span");
+    el.className = "word";
+    el.dataset.i = oldLength + n;
+
+    [...word].forEach(letter => {
+      const char = document.createElement("span");
+      char.className = "char";
+      char.textContent = letter;
+      el.append(char);
+    });
+
+    $("words").append(el, document.createTextNode(" "));
+  });
+}
+
+function commit() {
+  const wordEl = document.querySelector(`.word[data-i="${index}"]`);
+  if (!wordEl) return;
+
+  [...wordEl.children].forEach((char, i) => {
+    if (i >= typed.length) char.classList.add("skip");
+  });
+
+  const word = target[index];
+
+  for (let i = 0; i < word.length; i++) {
+    total++;
+    if (i < typed.length && typed[i] === word[i]) correct++;
+  }
+
+  index++;
+  typed = "";
+
+  if (index >= target.length) addWords();
+
+  $("input").value = "";
+  paint();
+}
+
+function finish() {
+  if (ended) return;
+  ended = true;
+  clearInterval(timer);
+  $("input").blur();
+
+  const elapsed = Math.max((duration - remaining) / 60, 1 / 60);
+  $("finalWpm").textContent = Math.round(correct / 5 / elapsed);
+  $("finalAcc").textContent =
+    (total ? Math.round(correct / total * 100) : 100) + "%";
+
+  $("overlay").classList.add("show");
+}
+
+function restart() {
+  clearInterval(timer);
+  remaining = duration;
+  index = 0;
+  typed = "";
+  started = false;
+  ended = false;
+  correct = 0;
+  total = 0;
+
+  $("time").textContent = duration;
+  $("overlay").classList.remove("show");
+  $("input").value = "";
+
+  makeWords();
+  render();
+  $("input").focus();
+}
+
+$("input").addEventListener("input", (e) => {
+    if (ended) return;
+
+    const value = $("input").value;
+    const currentWord = target[index];
+
+    // Har bir bosilgan tugmani faqat 1 marta umumiy hisobga qo'shish
+    total++;
+
+    // PROBEL (SPACE) BOSILGANDA (So'z tugaganda)
+    if (value.endsWith(" ")) {
+        start();
+        typed = value.trim();
+
+        // DIQQAT: Bu yerda correct'ni oshirmaymiz! 
+        // Uni commit() funksiyasining o'zi xavfsiz hisoblab oladi.
+        
+        commit();
+        return;
+    }
+
+    // SO'Z ICHIDAGI HARFLARNI ONLAYN TEKSHIRISH
+    typed = value;
+    start();
+    paint();
+});
+
+
+$("box").addEventListener("click", () => {
+  if (!ended) $("input").focus();
+});
+
+$("restart").addEventListener("click", restart);
+$("again").addEventListener("click", restart);
+
+document.querySelectorAll("[data-time]").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-time]").forEach(b =>
+      b.classList.remove("active")
+    );
+    button.classList.add("active");
+    duration = Number(button.dataset.time);
+    restart();
+  });
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Tab") {
+    event.preventDefault();
+    restart();
+    return;
+  }
+
+  if (event.code === "Space" && !ended &&
+      document.activeElement !== $("input")) {
+    event.preventDefault();
+    $("input").focus();
+  }
+});
+
+makeWords();
+render();
+</script>
+
+<!-- Reklama kodi uchun joy -->
+<script src="https://quge5.com/88/tag.min.js" data-zone="294999" async data-cfasync="false"></script>
+</body>
+</html>
